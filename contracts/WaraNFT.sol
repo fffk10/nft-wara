@@ -9,7 +9,38 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 
 contract WaraNFT is ERC721Enumerable, ERC721URIStorage, Ownable {
+    /**
+     * @dev
+     * - _tokenIdsはCountersの全関数を使用可能
+     */
+    using Counters for Counters.Counter;
+    Counters.Counter private _tokenIds;
+
+    /**
+     * @dev
+     * - 誰にどのtokenId,URIでNFTをmintしたかを記録する
+     */
+    event TokenURIChanged(
+        address indexed to,
+        uint256 indexed tokenId,
+        string uri
+    );
+
     constructor() ERC721("WaraNFT", "WARA") {}
+
+    /**
+     * @notice  .
+     * @dev     このコントラクトをデプロイしたアドレスだけがmint可能 onlyOnwer
+     * @param   to  .
+     * @param   uri  .
+     */
+    function nftMint(address to, string calldata uri) external onlyOwner {
+        _tokenIds.increment();
+        uint256 newTokenId = _tokenIds.current();
+        _mint(to, newTokenId);
+        _setTokenURI(newTokenId, uri);
+        emit TokenURIChanged(to, newTokenId, uri);
+    }
 
     /**
      * @notice  .
